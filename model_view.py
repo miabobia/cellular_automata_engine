@@ -60,7 +60,6 @@ class ExportView:
     def set_pallete(self, pallete: palletes.ColorPallete):
         self.pallete = pallete
 
-
     def render(self, grid: model.Grid) -> None:
         for i, row in enumerate(grid.cells):
             for j, cell in enumerate(row):
@@ -96,3 +95,15 @@ class ExportView:
         
         cv2.destroyAllWindows()
         video.release()
+
+        self.cleanup_frames('frames/')
+
+    def cleanup_frames(self, output_dir: str):
+        file_list = os.listdir(output_dir)
+        file_count = len(file_list)
+        for filename in file_list:
+            file_path = os.path.join(output_dir, filename)		
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
+        return file_count
