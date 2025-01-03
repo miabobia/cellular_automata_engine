@@ -19,7 +19,6 @@ class Controller():
     def read_input(self):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-
                 # `d` increments the pallete index
                 if event.key == pygame.K_d and not self.key_pressed["d"]:
                     self.key_pressed["d"] = True
@@ -29,9 +28,6 @@ class Controller():
                 elif event.key == pygame.K_s and not self.key_pressed["s"]:
                     self.key_pressed["s"] = True
                     self.push_event("pallete_increment", {"increment_val": -1})
-
-
-
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_d:
                     self.key_pressed["d"] = False
@@ -51,6 +47,9 @@ class Controller():
 - change framerate
 - pallete change
 - grid size
+- go to iteration (n)
+- randomize board
+
 
 
 what does a payload look like?

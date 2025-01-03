@@ -69,7 +69,6 @@ class Grid:
             for j, col in enumerate(row):
                 self.cells[i][j].state = self.cells[i][j].next_state
 
-
 class DisplayConfig:
 
     pallete_set = [

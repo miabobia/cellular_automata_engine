@@ -22,6 +22,8 @@ class ConfigHandler:
     config: GlobalConfig = GlobalConfig()
 
     def set_event(self, action: str, payload: dict):
+        # functools partial
+        # function handles that live in a default dict
         self.event_flag = True
         # event_type: str
         # event_payload: dict
@@ -41,7 +43,6 @@ class ConfigHandler:
             
             case _:
                 print('default case!')
-
 
         self.event = (event_type, event_payload)
     

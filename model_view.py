@@ -8,9 +8,7 @@ import cv2
 import os
 from datetime import datetime
 
-
-class GridView:
-
+class Viewer:
     def __init__(self, _grid: model.Grid, _screen: pg.surface, _pallete: palletes.ColorPallete):
         self.grid = _grid
         self.grid.add_observer(self)
@@ -21,7 +19,24 @@ class GridView:
         self.cell_width = self.screen_size[0]/self.grid.width
         self.cell_height = self.screen_size[1]/self.grid.height
 
-        self.pallete = _pallete
+        self.pallete = _pallete 
+
+class GridView(Viewer):
+
+    # def __init__(self, _grid: model.Grid, _screen: pg.surface, _pallete: palletes.ColorPallete):
+    #     self.grid = _grid
+    #     self.grid.add_observer(self)
+
+    #     # use screen to preprocess math for cell size
+    #     self.screen = _screen
+    #     self.screen_size = self.screen.get_size()
+    #     self.cell_width = self.screen_size[0]/self.grid.width
+    #     self.cell_height = self.screen_size[1]/self.grid.height
+
+    #     self.pallete = _pallete
+
+    def __init__(self, _grid: model.Grid, _screen: pg.surface, _pallete: palletes.ColorPallete):
+        super().__init__(_grid, _screen, _pallete)
 
     def update(self) -> None:
         self.render(self.grid)
@@ -38,19 +53,10 @@ class GridView:
                 r = pg.Rect(j * self.cell_width, i * self.cell_height, self.cell_width, self.cell_height)
                 pg.draw.rect(self.screen, c, r)
 
-class ExportView:
+class ExportView(Viewer):
 
     def __init__(self, _grid: model.Grid, _screen: pg.surface, _pallete: palletes.ColorPallete):
-        self.grid = _grid
-        self.grid.add_observer(self)
-
-        # use screen to preprocess math for cell size
-        self.screen = _screen
-        self.screen_size = self.screen.get_size()
-        self.cell_width = self.screen_size[0]/self.grid.width
-        self.cell_height = self.screen_size[1]/self.grid.height
-        self.pallete = _pallete
-
+        super().__init__(_grid, _screen, _pallete)
         Path(f'frames').mkdir(parents=True, exist_ok=True)
         self.image_counter = 0
 

@@ -28,6 +28,18 @@ def init_automata(grid_size: Tuple[int], screen: pygame.surface, m_view, ruleset
 
     return (grid, grid_view)
 
+def init_display_config():
+    pass
+
+def init_viewer():
+    pass
+
+def init_grid():
+    pass
+
+def init_model():
+    pass
+
 def update_pallete_index(p_index: int, increment: int) -> int:
     p_index += increment
     if p_index > len(pallete_set) - 1: p_index = 0
@@ -101,7 +113,6 @@ while running:
     #             key_pressed["s"] = False
 
     player_controller.read_input()
-
 
     grid.check_config_handler()
     grid.calculate_next_generation()
