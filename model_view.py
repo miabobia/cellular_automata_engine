@@ -2,74 +2,77 @@ from typing import List
 import model
 import pygame as pg
 import palletes
-import PIL
 from pathlib import Path
 import cv2
 import os
-from datetime import datetime
+import config
 
 class Viewer:
-    def __init__(self, _grid: model.Grid, _screen: pg.surface, _pallete: palletes.ColorPallete):
-        self.grid = _grid
-        self.grid.add_observer(self)
+    
+    cell_width: int = 0
+    cell_height: int = 0
 
+    def __init__(self, _screen: pg.surface, _display_config: config.DisplayConfig):
         # use screen to preprocess math for cell size
         self.screen = _screen
         self.screen_size = self.screen.get_size()
-        self.cell_width = self.screen_size[0]/self.grid.width
-        self.cell_height = self.screen_size[1]/self.grid.height
+        self.display_config = _display_config
+        self.pallete = self.display_config.data["pallete"]
 
-        self.pallete = _pallete 
+    def set_model(self, _model: model.Model) -> None:
+        """
+        sets model for Viewer. This is the source
+        of truth for the viewer's information about
+        the grid model
+        """
+        self.model = _model
+        self.resize_viewer()
+
+    def resize_viewer(self) -> None:
+        """
+        whenever changes are made to the grid size
+        the viewer needs to update its cell sizes 
+        """
+        self.cell_width = self.screen_size[0]/self.model.grid_model.width
+        self.cell_height = self.screen_size[1]/self.model.grid_model.height
+
+    def update(self) -> None:
+        self.render()
+
+    def update_pallete(self) -> None:
+        """
+        controller will send signal to display config to
+        update the pallete. display config will send signal to
+        viewer to read new pallete from display config 
+        """
+        self.pallete = self.display_config.data["pallete"]
+        
 
 class GridView(Viewer):
 
-    # def __init__(self, _grid: model.Grid, _screen: pg.surface, _pallete: palletes.ColorPallete):
-    #     self.grid = _grid
-    #     self.grid.add_observer(self)
+    def __init__(self, _screen: pg.surface, _display_config: config.DisplayConfig):
+        super().__init__(_screen, _display_config)
 
-    #     # use screen to preprocess math for cell size
-    #     self.screen = _screen
-    #     self.screen_size = self.screen.get_size()
-    #     self.cell_width = self.screen_size[0]/self.grid.width
-    #     self.cell_height = self.screen_size[1]/self.grid.height
-
-    #     self.pallete = _pallete
-
-    def __init__(self, _grid: model.Grid, _screen: pg.surface, _pallete: palletes.ColorPallete):
-        super().__init__(_grid, _screen, _pallete)
-
-    def update(self) -> None:
-        self.render(self.grid)
-
-    def set_pallete(self, pallete: palletes.ColorPallete):
-        self.pallete = pallete
-
-    def render(self, grid: model.Grid) -> None:
-        for i, row in enumerate(grid.cells):
+    def render(self) -> None:
+        for i, row in enumerate(self.model.grid_model.cells):
             for j, cell in enumerate(row):
-                # cell = grid.cells[i][j]
-                c = [cell.state * 255] * 3
                 c = self.pallete.get_color(cell.state)
                 r = pg.Rect(j * self.cell_width, i * self.cell_height, self.cell_width, self.cell_height)
                 pg.draw.rect(self.screen, c, r)
 
 class ExportView(Viewer):
 
-    def __init__(self, _grid: model.Grid, _screen: pg.surface, _pallete: palletes.ColorPallete):
-        super().__init__(_grid, _screen, _pallete)
+    def __init__(self, _screen: pg.surface, _display_config: config.DisplayConfig):
+        super().__init__(_screen, _display_config)
         Path(f'frames').mkdir(parents=True, exist_ok=True)
         self.image_counter = 0
-
-    def update(self) -> None:
-        self.render(self.grid)
 
     def set_pallete(self, pallete: palletes.ColorPallete):
         self.pallete = pallete
 
-    def render(self, grid: model.Grid) -> None:
-        for i, row in enumerate(grid.cells):
+    def render(self) -> None:
+        for i, row in enumerate(self.model.grid_model.cells):
             for j, cell in enumerate(row):
-                c = [cell.state * 255] * 3
                 c = self.pallete.get_color(cell.state)
                 r = pg.Rect(j * self.cell_width, i * self.cell_height, self.cell_width, self.cell_height)
                 pg.draw.rect(self.screen, c, r)

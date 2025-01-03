@@ -8,26 +8,33 @@
 
 import pygame
 import config
+import model
 from typing import Tuple
 
 class Controller():
 
-    def __init__(self, _config_handler: config.ConfigHandler):
-        self.config_handler = _config_handler
+    def __init__(self, _display_config: config.DisplayConfig, _model: model.Model):
+        self.display_config = _display_config
+        self.model = _model
         self.key_pressed = {"d": False, "s": False}
 
     def read_input(self):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
+            
                 # `d` increments the pallete index
                 if event.key == pygame.K_d and not self.key_pressed["d"]:
                     self.key_pressed["d"] = True
                     print('pushing increment event +1')
-                    self.push_event("pallete_increment", {"increment_val": 1})
+                    self.display_config.update_pallete_index(1)
+                    # self.push_event("pallete_increment", {"increment_val": 1})
+
                 # `s` decrements the pallete index
                 elif event.key == pygame.K_s and not self.key_pressed["s"]:
-                    self.key_pressed["s"] = True
-                    self.push_event("pallete_increment", {"increment_val": -1})
+                    self.display_config.update_pallete_index(-1)
+                    # self.key_pressed["s"] = True
+                    # self.push_event("pallete_increment", {"increment_val": -1})
+            
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_d:
                     self.key_pressed["d"] = False

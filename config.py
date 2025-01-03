@@ -1,5 +1,7 @@
 import palletes
+import model_view
 from typing import Tuple
+
 
 class GlobalConfig:
 
@@ -50,3 +52,32 @@ class ConfigHandler:
         # consume event
         self.event_flag = False
         return self.event
+
+class DisplayConfig:
+    pallete_set = [
+        palletes.ClassicPallete, palletes.TransPallete,
+        palletes.MatrixPallete, palletes.RetroPallete,
+        palletes.GameBoyPallete, palletes.PastelPinkYellowPallete,
+        palletes.PastelBlueYellowPallete, palletes.BlackRedPallete
+    ]
+
+    data = {
+        "pallete_index": 0,
+        "pallete": palletes.ClassicPallete
+    }
+
+    def set_viewer(self, _viewer: model_view.Viewer) -> None:
+        self.viewer = _viewer
+
+    def update_pallete_index(self, n: int) -> None:
+        # update pallete index and current pallete 
+        self.data["pallete_index"] += n
+        if self.data["pallete_index"] >= len(self.pallete_set):
+            self.data["pallete_index"] = 0
+        elif self.data["pallete_index"] < 0:
+            self.data["pallete_index"] = len(self.pallete_set) - 1
+        
+        self.data["pallete"] = self.pallete_set[self.data["pallete_index"]]
+
+        # let viewer know there was update
+        self.viewer.update_pallete()

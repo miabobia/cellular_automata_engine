@@ -8,6 +8,10 @@ import rulesets
 import palletes
 import controller
 import config
+import display_config
+import new_model
+import grid
+
 
 # frames cleanup !
 # name video
@@ -28,16 +32,20 @@ def init_automata(grid_size: Tuple[int], screen: pygame.surface, m_view, ruleset
 
     return (grid, grid_view)
 
-def init_display_config():
+def init_display_config() -> display_config.DisplayConfig:
+    return display_config.DisplayConfig()
+
+def init_grid(d_conf: display_config.DisplayConfig) -> model.Grid:
+    
+    grid_engine = grid.Grid
+
     pass
 
-def init_viewer():
+def init_viewer(d_conf: display_config.DisplayConfig) -> model_view.Viewer:
+    screen = pygame.display.set_mode(d_conf.data["screen_size"])
     pass
 
-def init_grid():
-    pass
-
-def init_model():
+def init_model() -> new_model.Model:
     pass
 
 def update_pallete_index(p_index: int, increment: int) -> int:
@@ -88,30 +96,8 @@ grid, grid_view = init_automata(grid_size, screen, model_viewer, ruleset, pallet
 player_controller = controller.Controller(config_handler)
 pygame.display.set_caption(str(grid.ruleset))
 clock = pygame.time.Clock()
-key_pressed = {"c": False, "s": False}
-
 running = True
 while running:
-    # for event in pygame.event.get():
-    #     if event.type == pygame.QUIT:
-    #         running = False
-    #     elif event.type == pygame.KEYDOWN:
-    #         if event.key == pygame.K_c and not key_pressed["c"]:
-    #             print("Key 'C' pressed!")
-    #             key_pressed["c"] = True
-
-    #         if event.key == pygame.K_s and not key_pressed["s"]:
-    #             pallete_index = update_pallete_index(pallete_index, 1)
-    #             grid_view.set_pallete(pallete_set[pallete_index])
-    #             key_pressed["s"] = True
-
-    #     elif event.type == pygame.KEYUP:
-    #         if event.key == pygame.K_c:
-    #             key_pressed["c"] = False
-
-    #         if event.key == pygame.K_s:
-    #             key_pressed["s"] = False
-
     player_controller.read_input()
 
     grid.check_config_handler()
