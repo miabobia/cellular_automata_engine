@@ -1,7 +1,11 @@
+from __future__ import annotations
+from typing import Tuple, TYPE_CHECKING
 import palletes
-import model_view
-from typing import Tuple
+from events import Event
 
+if TYPE_CHECKING:
+    from model_view import Viewer
+    from events import Event, EventDispatch
 
 class GlobalConfig:
 
@@ -66,12 +70,17 @@ class DisplayConfig:
         "pallete": palletes.ClassicPallete
     }
 
-    def set_viewer(self, _viewer: model_view.Viewer) -> None:
+    def __init__(self, _event_dispatch: EventDispatch):
+        self.event_dispatch = _event_dispatch
+        self.event_dispatch.add_listener("update_pallete_index", self.update_pallete_index)
+
+    def set_viewer(self, _viewer: Viewer) -> None:
         self.viewer = _viewer
 
-    def update_pallete_index(self, n: int) -> None:
+    def update_pallete_index(self, event: Event) -> None:
+        print(f"DisplayConfig.update_pallete_index({event})")
         # update pallete index and current pallete 
-        self.data["pallete_index"] += n
+        self.data["pallete_index"] += event.data
         if self.data["pallete_index"] >= len(self.pallete_set):
             self.data["pallete_index"] = 0
         elif self.data["pallete_index"] < 0:
@@ -79,5 +88,9 @@ class DisplayConfig:
         
         self.data["pallete"] = self.pallete_set[self.data["pallete_index"]]
 
-        # let viewer know there was update
-        self.viewer.update_pallete()
+        # emit event to let viewer know there was update
+        # self.viewer.update_pallete()
+        self.event_dispatch.dispatch(Event("update_pallete", None))
+
+
+# ghostie shell

@@ -1,25 +1,31 @@
-from typing import List
-import model
+from __future__ import annotations
+from typing import List, TYPE_CHECKING
 import pygame as pg
-import palletes
 from pathlib import Path
 import cv2
 import os
-import config
+
+if TYPE_CHECKING:
+    from model import Model
+    from config import DisplayConfig
+    from events import Event, EventDispatch
+
 
 class Viewer:
     
     cell_width: int = 0
     cell_height: int = 0
 
-    def __init__(self, _screen: pg.surface, _display_config: config.DisplayConfig):
-        # use screen to preprocess math for cell size
+    def __init__(self, _screen: pg.surface, _display_config: DisplayConfig, _event_dispatch: EventDispatch):
+        self.event_dispatch = _event_dispatch
         self.screen = _screen
         self.screen_size = self.screen.get_size()
         self.display_config = _display_config
         self.pallete = self.display_config.data["pallete"]
 
-    def set_model(self, _model: model.Model) -> None:
+        self.event_dispatch.add_listener("update_pallete", self.update_pallete)
+
+    def set_model(self, _model: Model) -> None:
         """
         sets model for Viewer. This is the source
         of truth for the viewer's information about
@@ -39,7 +45,7 @@ class Viewer:
     def update(self) -> None:
         self.render()
 
-    def update_pallete(self) -> None:
+    def update_pallete(self, event: Event) -> None:
         """
         controller will send signal to display config to
         update the pallete. display config will send signal to
@@ -50,7 +56,7 @@ class Viewer:
 
 class GridView(Viewer):
 
-    def __init__(self, _screen: pg.surface, _display_config: config.DisplayConfig):
+    def __init__(self, _screen: pg.surface, _display_config: DisplayConfig):
         super().__init__(_screen, _display_config)
 
     def render(self) -> None:
@@ -62,13 +68,10 @@ class GridView(Viewer):
 
 class ExportView(Viewer):
 
-    def __init__(self, _screen: pg.surface, _display_config: config.DisplayConfig):
+    def __init__(self, _screen: pg.surface, _display_config: DisplayConfig):
         super().__init__(_screen, _display_config)
         Path(f'frames').mkdir(parents=True, exist_ok=True)
         self.image_counter = 0
-
-    def set_pallete(self, pallete: palletes.ColorPallete):
-        self.pallete = pallete
 
     def render(self) -> None:
         for i, row in enumerate(self.model.grid_model.cells):

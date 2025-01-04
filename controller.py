@@ -6,16 +6,19 @@
 # model checks config handler event flag
 # if eventflag model reads event and transforms model logic
 
+from __future__ import annotations
 import pygame
-import config
-import model
-from typing import Tuple
+from typing import TYPE_CHECKING
+from events import Event
+
+if TYPE_CHECKING:
+    from model import Model
+    from events import Event, EventDispatch
 
 class Controller():
 
-    def __init__(self, _display_config: config.DisplayConfig, _model: model.Model):
-        self.display_config = _display_config
-        self.model = _model
+    def __init__(self, _event_dispatch: EventDispatch):
+        self.event_dispatch = _event_dispatch
         self.key_pressed = {"d": False, "s": False}
 
     def read_input(self):
@@ -25,15 +28,12 @@ class Controller():
                 # `d` increments the pallete index
                 if event.key == pygame.K_d and not self.key_pressed["d"]:
                     self.key_pressed["d"] = True
-                    print('pushing increment event +1')
-                    self.display_config.update_pallete_index(1)
-                    # self.push_event("pallete_increment", {"increment_val": 1})
+                    self.event_dispatch.dispatch(Event("update_pallete_index", 1))
 
                 # `s` decrements the pallete index
                 elif event.key == pygame.K_s and not self.key_pressed["s"]:
-                    self.display_config.update_pallete_index(-1)
-                    # self.key_pressed["s"] = True
-                    # self.push_event("pallete_increment", {"increment_val": -1})
+                    self.key_pressed["s"] = True
+                    self.event_dispatch.dispatch(Event("update_pallete_index", -1))
             
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_d:
@@ -41,11 +41,6 @@ class Controller():
 
                 if event.key == pygame.K_s:
                     self.key_pressed["s"] = False
-    
-    def push_event(self, action: str, payload: dict):
-        self.config_handler.set_event(action, payload)
-
-    
     
 """
 ===PAYLOADS===

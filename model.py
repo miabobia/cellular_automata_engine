@@ -1,100 +1,25 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import List
-import model_view
-import rulesets
-import grid
+from typing import List, TYPE_CHECKING
+from events import Event
 
-# @dataclass
-# class Cell:
-#     x: int
-#     y: int
-#     state: int
-#     next_state: int = 0
+if TYPE_CHECKING:
+    from grid import Grid
+    from model_view import Viewer
+    from rulesets import Ruleset
+    from events import EventDispatch
 
-#     def set_neighbors(self, _neighbors: List["Cell"]) -> None:
-#         self.neighbors = _neighbors
-
-#     def toggle(self) -> None:
-#         if self.state:
-#             self.state = 1
-#         else:
-#             self.state = 0
-
-# @dataclass
-# class Grid:
-#     width: int
-#     height: int
-#     cells: List[Cell]
-#     config_handler: config.ConfigHandler
-#     global_config: config.GlobalConfig
-    
-#     def set_cell_neighbors(self):
-#         for i, row in enumerate(self.cells):
-#             for j, cell in enumerate(row):
-#                 cell.neighbors = []
-#                 for nx, ny in self.ruleset.get_neighbor_pattern():
-#                     neighbor_x = (j + nx) % self.width
-#                     neighbor_y = (i + ny) % self.height
-
-#                     cell.neighbors.append(self.cells[neighbor_y][neighbor_x])
-
-#     def add_observer(self, _observer) -> None:
-#         self.observer = _observer
-
-#     def notify_observer(self) -> None:
-#         self.observer.update()
-
-#     def set_ruleset(self, _ruleset: rulesets.Ruleset):
-#         self.ruleset = _ruleset
-
-#     def check_config_handler(self):
-#         if not self.config_handler.event_flag: return
-        
-#         # retrieve event and trigger event being toggled off
-#         action, payload = self.config_handler.get_event()
-
-
-#         match action:
-#             case "pallete_update":
-#                 self.observer.set_pallete(self.read_global_config("pallete"))
-
-#             case _:
-#                 print('default case!')
-
-
-#     def read_global_config(self, key: str):
-
-#         return self.global_config.data.get(key)
-
-#     def calculate_next_generation(self):
-#         self.ruleset.next_generation(self.cells)
-
-#         # swap current state with next state
-#         for i, row in enumerate(self.cells):
-#             for j, col in enumerate(row):
-#                 self.cells[i][j].state = self.cells[i][j].next_state
-
-# class DisplayConfig:
-
-#     pallete_set = [
-#         palletes.ClassicPallete, palletes.TransPallete,
-#         palletes.MatrixPallete, palletes.RetroPallete,
-#         palletes.GameBoyPallete, palletes.PastelPinkYellowPallete,
-#         palletes.PastelBlueYellowPallete, palletes.BlackRedPallete
-#     ]
-
-#     data = {
-#         "pallete_index": 0,
-#         "pallete": palletes.ClassicPallete
-#     }
-
-@dataclass
 class Model:
-
-    grid_model: grid.Grid
     fps: int
     running: bool = True
-    viewer: model_view.Viewer = None
+
+    def __init__(self, _event_dispatch: EventDispatch, _fps: int):
+        self.event_dispatch = _event_dispatch
+        self.fps = _fps
+
+        # add event listeners for controller here!
+        # self.event_dispatch.add_listener
+
 
     def step(self) -> None:
         """
@@ -102,14 +27,25 @@ class Model:
         grid -> calculates next generation
         viewer -> tells viewer to render
         """
-        self.grid_model.calculate_next_generation()
-        self.viewer.update()
+        self.event_dispatch.dispatch(Event("calculate_next_generation", None))
+
+        # model tells grid to update
+        # grid emits event for viewer to update
+
+        # self.grid_model.calculate_next_generation()
+        # self.viewer.update()
 
     def toggle_cell(self, x: int, y: int) -> None:
         """
         updates grid's cell to toggle on or off
         """
-        self.grid_model.cells[y][x].toggle()
+        # THIS CAN BE EMIITED BY THE CONTROLLER NOW !
+        pass
+        # self.event_dispatch.dispatch(Event("toggle_cell", {"y": y, "x": x}))
+
+
+
+        # self.grid_model.cells[y][x].toggle()
 
     def set_grid_size(self, grid_width: int, grid_height: int) -> None:
         """
@@ -117,8 +53,10 @@ class Model:
         this should wipe all cells and create new cells
         new cells will need new width,height based on grid/screen size
         """
+        # THIS CAN BE EMMITED DIRECTLY FROM 
+        pass
         # overwrite old grid_model
-        self.grid_model = grid.Grid(
+        self.grid_model = Grid(
             ruleset=self.grid_model.ruleset,
             width=grid_width,
             height=grid_height,
@@ -126,7 +64,7 @@ class Model:
         # update viewer accordingly
         self.viewer.resize_viewer()
 
-    def set_ruleset(self, ruleset: rulesets.Ruleset) -> None:
+    def set_ruleset(self, ruleset: Ruleset) -> None:
         """
         give grid a new ruleset for calculating next gen
         """
@@ -145,6 +83,6 @@ class Model:
         """
         self.running = not self.running
 
-    def set_viewer(self, _viewer: model_view.Viewer) -> None:
+    def set_viewer(self, _viewer: Viewer) -> None:
         self.viewer = _viewer
         self.viewer.set_model(self)

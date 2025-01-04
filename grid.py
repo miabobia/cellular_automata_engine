@@ -1,7 +1,11 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import List
+from typing import List, TYPE_CHECKING
 from random import randint
-import rulesets
+# import rulesets
+
+if TYPE_CHECKING:
+    from rulesets import Ruleset
 
 @dataclass
 class Cell:
@@ -20,7 +24,7 @@ class Cell:
             self.state = 0
 
 class Grid:
-    def __init__(self, _ruleset: rulesets.Ruleset, _width: int = 50, _height: int = 50) -> None:
+    def __init__(self, _ruleset: Ruleset, _width: int = 50, _height: int = 50) -> None:
         self.ruleset = _ruleset
         self.width = _width
         self.height = _height
