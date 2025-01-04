@@ -13,13 +13,16 @@ from events import Event
 
 if TYPE_CHECKING:
     from model import Model
-    from events import Event, EventDispatch
+    from model_view import Viewer
+    from config import DisplayConfig
 
 class Controller():
 
-    def __init__(self, _event_dispatch: EventDispatch):
-        self.event_dispatch = _event_dispatch
-        self.key_pressed = {"d": False, "s": False}
+    def __init__(self, _model: Model, _viewer: Viewer, _config: DisplayConfig):
+        self.key_pressed = {"d": False, "s": False, "z": False, "x": False}
+        self.model = _model
+        self.viewer = _viewer
+        self.config = _config
 
     def read_input(self):
         for event in pygame.event.get():
@@ -28,12 +31,24 @@ class Controller():
                 # `d` increments the pallete index
                 if event.key == pygame.K_d and not self.key_pressed["d"]:
                     self.key_pressed["d"] = True
-                    self.event_dispatch.dispatch(Event("update_pallete_index", 1))
+                    self.config.update_pallete_index(1)
+                    self.viewer.update_pallete()
 
                 # `s` decrements the pallete index
                 elif event.key == pygame.K_s and not self.key_pressed["s"]:
                     self.key_pressed["s"] = True
-                    self.event_dispatch.dispatch(Event("update_pallete_index", -1))
+                    self.config.update_pallete_index(-1)
+                    self.viewer.update_pallete()
+
+                # `z` decrements the grid size            
+                elif event.key == pygame.K_z and not self.key_pressed["z"]:
+                    self.key_pressed["z"] = True
+                    self.model.increment_grid_size(1)
+
+                # `x` increments the grid size
+                elif event.key == pygame.K_x and not self.key_pressed["x"]:
+                    self.key_pressed["x"] = True
+                    self.model.increment_grid_size(-1)
             
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_d:
@@ -41,6 +56,12 @@ class Controller():
 
                 if event.key == pygame.K_s:
                     self.key_pressed["s"] = False
+
+                if event.key == pygame.K_z:
+                    self.key_pressed["z"] = False
+
+                if event.key == pygame.K_x:
+                    self.key_pressed["x"] = False
     
 """
 ===PAYLOADS===

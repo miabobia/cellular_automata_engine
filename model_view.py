@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from model import Model
     from config import DisplayConfig
     from events import Event, EventDispatch
+    from grid import Grid
 
 
 class Viewer:
@@ -16,16 +17,14 @@ class Viewer:
     cell_width: int = 0
     cell_height: int = 0
 
-    def __init__(self, _screen: pg.surface, _display_config: DisplayConfig, _event_dispatch: EventDispatch):
-        self.event_dispatch = _event_dispatch
+    def __init__(self, _screen: pg.surface, _display_config: DisplayConfig):
         self.screen = _screen
         self.screen_size = self.screen.get_size()
         self.display_config = _display_config
         self.pallete = self.display_config.data["pallete"]
+        # self.resize_viewer()
 
-        self.event_dispatch.add_listener("update_pallete", self.update_pallete)
-
-    def set_model(self, _model: Model) -> None:
+    def set_model(self, _model: Model):
         """
         sets model for Viewer. This is the source
         of truth for the viewer's information about
@@ -34,18 +33,20 @@ class Viewer:
         self.model = _model
         self.resize_viewer()
 
-    def resize_viewer(self) -> None:
+    def resize_viewer(self, grid_width: int, grid_height: int):
         """
         whenever changes are made to the grid size
         the viewer needs to update its cell sizes 
         """
-        self.cell_width = self.screen_size[0]/self.model.grid_model.width
-        self.cell_height = self.screen_size[1]/self.model.grid_model.height
+        self.cell_width = self.screen_size[0]/grid_width
+        self.cell_height = self.screen_size[1]/grid_height
+        print(grid_width, grid_height)
+        print(self.cell_width, self.cell_height)
 
-    def update(self) -> None:
-        self.render()
+    def update(self, model_grid: Grid):
+        self.render(model_grid)
 
-    def update_pallete(self, event: Event) -> None:
+    def update_pallete(self):
         """
         controller will send signal to display config to
         update the pallete. display config will send signal to
@@ -59,8 +60,8 @@ class GridView(Viewer):
     def __init__(self, _screen: pg.surface, _display_config: DisplayConfig):
         super().__init__(_screen, _display_config)
 
-    def render(self) -> None:
-        for i, row in enumerate(self.model.grid_model.cells):
+    def render(self, model_grid: Grid):
+        for i, row in enumerate(model_grid.cells):
             for j, cell in enumerate(row):
                 c = self.pallete.get_color(cell.state)
                 r = pg.Rect(j * self.cell_width, i * self.cell_height, self.cell_width, self.cell_height)
@@ -73,8 +74,8 @@ class ExportView(Viewer):
         Path(f'frames').mkdir(parents=True, exist_ok=True)
         self.image_counter = 0
 
-    def render(self) -> None:
-        for i, row in enumerate(self.model.grid_model.cells):
+    def render(self, model_grid: Grid):
+        for i, row in enumerate(model_grid.cells):
             for j, cell in enumerate(row):
                 c = self.pallete.get_color(cell.state)
                 r = pg.Rect(j * self.cell_width, i * self.cell_height, self.cell_width, self.cell_height)

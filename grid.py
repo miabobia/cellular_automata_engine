@@ -14,23 +14,24 @@ class Cell:
     state: int
     next_state: int = 0
 
-    def set_neighbors(self, _neighbors: List["Cell"]) -> None:
+    def set_neighbors(self, _neighbors: List["Cell"]):
         self.neighbors = _neighbors
 
-    def toggle(self) -> None:
+    def toggle(self):
         if self.state:
             self.state = 1
         else:
             self.state = 0
 
 class Grid:
-    def __init__(self, _ruleset: Ruleset, _width: int = 50, _height: int = 50) -> None:
+    def __init__(self, _ruleset: Ruleset, _width: int, _height: int):
         self.ruleset = _ruleset
         self.width = _width
         self.height = _height
         self.init_cells()
+        self.set_cell_neighbors()
 
-    def init_cells(self) -> None:
+    def init_cells(self):
         self.cells = []
         for i in range(self.height):
             self.cells.append([])

@@ -4,7 +4,7 @@ from model import Model
 from config import DisplayConfig
 from grid import Grid
 import rulesets
-from model_view import Viewer
+from model_view import Viewer, GridView
 from events import EventDispatch
 import sys
 
@@ -27,17 +27,22 @@ pygame.init()
 screen_size = (500, 500)
 screen = pygame.display.set_mode(screen_size)
 
+config = DisplayConfig()
+viewer = GridView(screen, config)
+game_model = Model(viewer, 60, rulesets.Conway())
+game_controller = Controller(game_model, viewer, config)
 
-event_dispatch = EventDispatch()
 
-display_config = DisplayConfig(event_dispatch)
-grid_model = Grid(rulesets.Conway())
-game_model = Model(grid_model=grid_model, fps=60)
-game_controller = Controller(event_dispatch)
-game_viewer = Viewer(_screen=screen, _display_config=display_config, _event_dispatch=event_dispatch)
+# event_dispatch = EventDispatch()
 
-display_config.set_viewer(game_viewer)
-game_model.set_viewer(game_viewer)
+# display_config = DisplayConfig(event_dispatch)
+# grid_model = Grid(rulesets.Conway())
+# game_model = Model(grid_model=grid_model, fps=60)
+# game_controller = Controller(event_dispatch)
+# game_viewer = Viewer(_screen=screen, _display_config=display_config, _event_dispatch=event_dispatch)
+
+# display_config.set_viewer(game_viewer)
+# game_model.set_viewer(game_viewer)
 
 # # config_handler = config.ConfigHandler()
 # # grid, grid_view = init_automata(grid_size, screen, model_viewer, ruleset, pallete, config_handler)
@@ -48,12 +53,15 @@ running = True
 while running:    
     game_controller.read_input()
 
+    screen.fill((255, 0, 0))
+    game_model.step()
+
     # grid.check_config_handler()
     # grid.calculate_next_generation()
     # grid.notify_observer()
 
     # if render_screen: pygame.display.flip()
-
+    pygame.display.flip()
     clock.tick(60)
 
 #     fps_counter += 1

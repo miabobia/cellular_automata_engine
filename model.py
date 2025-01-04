@@ -1,88 +1,86 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, TYPE_CHECKING
-from events import Event
+from grid import Grid
 
 if TYPE_CHECKING:
-    from grid import Grid
     from model_view import Viewer
     from rulesets import Ruleset
-    from events import EventDispatch
 
 class Model:
-    fps: int
     running: bool = True
 
-    def __init__(self, _event_dispatch: EventDispatch, _fps: int):
-        self.event_dispatch = _event_dispatch
+    def __init__(self, _viewer: Viewer, _fps: int, _ruleset: Ruleset, _width=50, _height=50):
         self.fps = _fps
+        self.viewer = _viewer
+        self.grid_model = Grid(_ruleset, _width, _height)
+        self.viewer.resize_viewer(_width, _height)
 
-        # add event listeners for controller here!
-        # self.event_dispatch.add_listener
-
-
-    def step(self) -> None:
+    def step(self):
         """
         takes a step in the game loop
         grid -> calculates next generation
         viewer -> tells viewer to render
         """
-        self.event_dispatch.dispatch(Event("calculate_next_generation", None))
-
         # model tells grid to update
         # grid emits event for viewer to update
 
         # self.grid_model.calculate_next_generation()
         # self.viewer.update()
+        if not self.running: return
 
-    def toggle_cell(self, x: int, y: int) -> None:
+        self.grid_model.calculate_next_generation()
+        self.viewer.update(self.grid_model)
+
+    def toggle_cell(self, x: int, y: int):
         """
         updates grid's cell to toggle on or off
         """
-        # THIS CAN BE EMIITED BY THE CONTROLLER NOW !
-        pass
-        # self.event_dispatch.dispatch(Event("toggle_cell", {"y": y, "x": x}))
+        self.grid_model.cells[y][x].toggle()
 
+    def increment_grid_size(self, n: int):
+        """
+        takes grid of size n x n and transforms it to n + (-1/1) x n + (-1/1)
+        """
+        new_grid_size = self.grid_model.width + n
+        if new_grid_size <= 0: return
 
+        self.set_grid_size(new_grid_size, new_grid_size)
 
-        # self.grid_model.cells[y][x].toggle()
-
-    def set_grid_size(self, grid_width: int, grid_height: int) -> None:
+    def set_grid_size(self, grid_width: int, grid_height: int):
         """
         update's grid size property.
         this should wipe all cells and create new cells
         new cells will need new width,height based on grid/screen size
         """
-        # THIS CAN BE EMMITED DIRECTLY FROM 
-        pass
         # overwrite old grid_model
         self.grid_model = Grid(
-            ruleset=self.grid_model.ruleset,
-            width=grid_width,
-            height=grid_height,
+            _ruleset=self.grid_model.ruleset,
+            _width=grid_width,
+            _height=grid_height,
         )
         # update viewer accordingly
-        self.viewer.resize_viewer()
+        self.viewer.resize_viewer(grid_width, grid_height)
 
-    def set_ruleset(self, ruleset: Ruleset) -> None:
+    def set_ruleset(self, ruleset: Ruleset):
         """
         give grid a new ruleset for calculating next gen
         """
         self.grid_model.set_ruleset(ruleset)
 
-    def set_fps(self) -> None:
+    def set_fps(self):
         """
         setter for fps. changes how often step is called
         """
         # unsure of how to implement this as it's outside of scope of model due to main game loop being ran by pygame
         pass
 
-    def toggle_pause_resume(self) -> None:
+    def toggle_pause_resume(self):
         """
         sets game state to paused or running
         """
         self.running = not self.running
 
-    def set_viewer(self, _viewer: Viewer) -> None:
+    def set_viewer(self, _viewer: Viewer):
         self.viewer = _viewer
         self.viewer.set_model(self)
