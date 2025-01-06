@@ -9,28 +9,32 @@ if TYPE_CHECKING:
 
 class Model:
     running: bool = True
+    generation: int = 0
 
-    def __init__(self, _viewer: Viewer, _fps: int, _ruleset: Ruleset, _width=50, _height=50):
+    def __init__(self, _viewer: Viewer, _fps: int, _ruleset: Ruleset, _total_generations=-1, _width=50, _height=50):
         self.fps = _fps
         self.viewer = _viewer
         self.grid_model = Grid(_ruleset, _width, _height)
         self.viewer.resize_viewer(_width, _height)
+        self.total_generations = _total_generations
 
-    def step(self):
+    def step(self) -> bool:
         """
         takes a step in the game loop
         grid -> calculates next generation
         viewer -> tells viewer to render
         """
-        # model tells grid to update
-        # grid emits event for viewer to update
-
-        # self.grid_model.calculate_next_generation()
-        # self.viewer.update()
-        if not self.running: return
-
+        # model tells grid and viewer to update
+        # returns true if there are more simulations to run
+        if self.generation == self.total_generations:
+            self.viewer.cleanup()
+            return False
+        if not self.running:
+            return True
+        self.generation += 1
         self.grid_model.calculate_next_generation()
         self.viewer.update(self.grid_model)
+        return True
 
     def toggle_cell(self, x: int, y: int):
         """
