@@ -1,4 +1,5 @@
 import palletes
+from model_view import Viewer
 
 class DisplayConfig:
     pallete_set = [
@@ -13,6 +14,10 @@ class DisplayConfig:
         "pallete": palletes.ClassicPallete
     }
 
+    def __init__(self, _viewer_type: Viewer, _total_frames=100):
+        self.viewer_type = _viewer_type
+        self.total_frames = _total_frames
+        
     def update_pallete_index(self, n: int) -> None:
         # update pallete index and current pallete 
         self.data["pallete_index"] += n

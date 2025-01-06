@@ -127,6 +127,11 @@ class WickstretcherParasites(Ruleset):
             (1, -1), (1, 0), (1, 1)       # Bottom row
         ]
     
+# '''
+#     A cell is born if there are 0, 1, 3, 5 or 6 cells around it.
+#     A cell stays if there are 0, 1, 2, 3, 4 or 5 cells around it.
+# '''
+
     def next_generation(self, grid):
         survive_condition = set([0, 1, 2, 3, 4, 5])
         born_condition = set([0, 1, 3, 5, 6])

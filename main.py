@@ -1,126 +1,48 @@
 import pygame
-import sys
-import model_view
-import model
-from typing import Tuple
-from random import randint
+from controller import Controller
+from model import Model
+from config import DisplayConfig
 import rulesets
-import palletes
-import controller
-import config
-import display_config
-import new_model
-import grid
-
-
-# frames cleanup !
-# name video
-
-def init_automata(grid_size: Tuple[int], screen: pygame.surface, m_view, ruleset: rulesets.Ruleset, pallete: palletes.ColorPallete, config_handler: config.ConfigHandler) -> Tuple[model.Grid, model_view.GridView]:
-    # init cells
-    cells = []
-    grid_width, grid_height = grid_size
-    for i in range(grid_height):
-        cells.append([])
-        for j in range(grid_width):
-            cells[i].append(model.Cell(j, i, randint(0, 1)))
-    grid_w, grid_h = grid_size
-    grid = model.Grid(grid_w, grid_h, cells, config_handler, config_handler.config)
-    grid_view = m_view(grid, screen, pallete)
-    grid.set_ruleset(ruleset)
-    grid.set_cell_neighbors()
-
-    return (grid, grid_view)
-
-def init_display_config() -> display_config.DisplayConfig:
-    return display_config.DisplayConfig()
-
-def init_grid(d_conf: display_config.DisplayConfig) -> model.Grid:
-    
-    grid_engine = grid.Grid
-
-    pass
-
-def init_viewer(d_conf: display_config.DisplayConfig) -> model_view.Viewer:
-    screen = pygame.display.set_mode(d_conf.data["screen_size"])
-    pass
-
-def init_model() -> new_model.Model:
-    pass
-
-def update_pallete_index(p_index: int, increment: int) -> int:
-    p_index += increment
-    if p_index > len(pallete_set) - 1: p_index = 0
-    return p_index
-    
-# ===board=dimensions===
-screen_size = (500, 500)
-grid_size = (50, 50)
-
-# ===model=viewer===
-model_viewer = model_view.GridView
-
-# ===ruleset===
-ruleset = rulesets.HighLifeRuleset()
-
-# ===pallete===
-pallete_set = [
-    palletes.ClassicPallete, palletes.TransPallete,
-    palletes.MatrixPallete, palletes.RetroPallete,
-    palletes.GameBoyPallete, palletes.PastelPinkYellowPallete,
-    palletes.PastelBlueYellowPallete, palletes.BlackRedPallete
-    ]
-pallete_index = 0
-pallete = pallete_set[pallete_index]
-
-# ===simulation=timing===
-timed_sim = False
-timer_end = 250
-
-# ===animation=timer===
-pallete_swap_index = 0
-pallete_swap_time = 0
-
-# ===fps===
-fps = 30
-fps_counter = 0
-fps_sum = 0
-
-# ===rendering=flags===
-render_screen = model_viewer not in [model_view.ExportView]
+from model_view import Viewer, GridView, ExportView
+import sys
 
 pygame.init()
+
+screen_size = (1500, 1500)
 screen = pygame.display.set_mode(screen_size)
-config_handler = config.ConfigHandler()
-grid, grid_view = init_automata(grid_size, screen, model_viewer, ruleset, pallete, config_handler)
-player_controller = controller.Controller(config_handler)
-pygame.display.set_caption(str(grid.ruleset))
+
+config = DisplayConfig(_viewer_type=ExportView)
+viewer = config.viewer_type(screen, config)
+game_model = Model(viewer, 60, rulesets.DayNightRuleset(), 50, 50)
+game_controller = Controller(game_model, viewer, config)
+
+timed_simulation = False
+frame = 0
+
+# viewer is exporting to video has to be a limited amount of simulations
+# and timed_simulation wasn't set manually by user
+timed_simulation = not timed_simulation and config.viewer_type == ExportView
+# if viewer is exporting to video then we don't render simulations to pygame window
+render_simulation = config.viewer_type != ExportView
+
 clock = pygame.time.Clock()
 running = True
-while running:
-    player_controller.read_input()
+while running:    
+    game_controller.read_input()
+    game_model.step()
 
-    grid.check_config_handler()
-    grid.calculate_next_generation()
-    grid.notify_observer()
+    if render_simulation:
+        screen.fill((255, 0, 0))
+        pygame.display.flip()
 
-    if render_screen: pygame.display.flip()
+    clock.tick(60)
 
-    clock.tick(fps)
-
-    fps_counter += 1
-
-    if pallete_swap_time:
-        pallete_swap_index += 1
-        if pallete_swap_time == pallete_swap_index:
-            pallete_index = update_pallete_index(pallete_index, 1)
-            grid_view.set_pallete(pallete_set[pallete_index])
-            pallete_swap_index = 0
-
-    if timed_sim and fps_counter == timer_end:
-        break
-
-if not render_screen: grid_view.compile_frames(fps)
+    if timed_simulation:
+        frame += 1
+        if frame == config.total_frames:
+            break
+viewer.compile_frames(15)
+viewer.cleanup_frames("frames")
 
 pygame.quit()
 sys.exit()

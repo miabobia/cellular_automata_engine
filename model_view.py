@@ -40,8 +40,6 @@ class Viewer:
         """
         self.cell_width = self.screen_size[0]/grid_width
         self.cell_height = self.screen_size[1]/grid_height
-        print(grid_width, grid_height)
-        print(self.cell_width, self.cell_height)
 
     def update(self, model_grid: Grid):
         self.render(model_grid)
