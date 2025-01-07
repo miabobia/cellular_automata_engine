@@ -51,6 +51,14 @@ class Model:
 
         self.set_grid_size(new_grid_size, new_grid_size)
 
+    def reset_grid(self):
+        # overwrite old grid_model
+        self.grid_model = Grid(
+            _ruleset=self.grid_model.ruleset,
+            _width=self.grid_model.width,
+            _height=self.grid_model.height
+        )   
+
     def set_grid_size(self, grid_width: int, grid_height: int):
         """
         update's grid size property.

@@ -2,10 +2,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, TYPE_CHECKING
 from random import randint
-# import rulesets
+from enum import Enum
 
 if TYPE_CHECKING:
     from rulesets import Ruleset
+
+class CellState(Enum):
+    DEAD = 0
+    ALIVE = 1
 
 @dataclass
 class Cell:
@@ -13,6 +17,7 @@ class Cell:
     y: int
     state: int
     next_state: int = 0
+    lifetime: int = 0
 
     def set_neighbors(self, _neighbors: List["Cell"]):
         self.neighbors = _neighbors

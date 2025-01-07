@@ -19,7 +19,11 @@ if TYPE_CHECKING:
 class Controller():
 
     def __init__(self, _model: Model, _viewer: Viewer, _config: DisplayConfig):
-        self.key_pressed = {"d": False, "s": False, "z": False, "x": False}
+        self.key_pressed = {
+            "d": False, "s": False,
+            "z": False, "x": False,
+            " ": False, "r": False
+        }
         self.model = _model
         self.viewer = _viewer
         self.config = _config
@@ -49,6 +53,14 @@ class Controller():
                 elif event.key == pygame.K_x and not self.key_pressed["x"]:
                     self.key_pressed["x"] = True
                     self.model.increment_grid_size(-1)
+
+                elif event.key == pygame.K_SPACE and not self.key_pressed[" "]:
+                    self.key_pressed[" "] = True
+                    self.model.toggle_pause_resume()
+
+                elif event.key == pygame.K_r and not self.key_pressed["r"]:
+                    self.key_pressed["r"] = True
+                    self.model.reset_grid()
             
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_d:
@@ -62,7 +74,13 @@ class Controller():
 
                 if event.key == pygame.K_x:
                     self.key_pressed["x"] = False
-    
+
+                if event.key == pygame.K_SPACE:
+                    self.key_pressed[" "] = False
+
+                if event.key == pygame.K_r:
+                    self.key_pressed["r"] = False
+
 """
 ===PAYLOADS===
 - toggle the state of a cell
