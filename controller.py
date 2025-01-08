@@ -1,15 +1,7 @@
-# controller receives user input
-# controller pushes payload to config handler
-# config handler makes change in global config obj
-# config handler sets event flag to true
-# model subscribes to config handler
-# model checks config handler event flag
-# if eventflag model reads event and transforms model logic
-
 from __future__ import annotations
 import pygame
-from typing import TYPE_CHECKING
-from events import Event
+from typing import TYPE_CHECKING, Tuple
+from enum import Enum
 
 if TYPE_CHECKING:
     from model import Model
@@ -17,21 +9,27 @@ if TYPE_CHECKING:
     from config import DisplayConfig
 
 class Controller():
-
     def __init__(self, _model: Model, _viewer: Viewer, _config: DisplayConfig):
         self.key_pressed = {
             "d": False, "s": False,
             "z": False, "x": False,
             " ": False, "r": False
         }
+        self.mouse_pressed = {
+            "left": False,
+            "right": False,
+            "middle": False
+        }
         self.model = _model
         self.viewer = _viewer
         self.config = _config
+        self.mouse_mode = 0
 
     def read_input(self):
         for event in pygame.event.get():
+
+            # key press event handling
             if event.type == pygame.KEYDOWN:
-            
                 # `d` increments the pallete index
                 if event.key == pygame.K_d and not self.key_pressed["d"]:
                     self.key_pressed["d"] = True
@@ -80,6 +78,58 @@ class Controller():
 
                 if event.key == pygame.K_r:
                     self.key_pressed["r"] = False
+            
+            # mouse press event handling
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mx, my = pygame.mouse.get_pos()
+                left, middle, right = pygame.mouse.get_pressed()
+
+                cell_x, cell_y = self.mouse_to_grid_pos(pygame.mouse.get_pos())
+                if self.model.grid_model.cells[cell_y][cell_x].state:
+                    self.mouse_mode = 0
+                else:
+                    self.mouse_mode = 1
+                if left and not self.mouse_pressed["left"]:
+                    self.mouse_pressed["left"] = True
+
+                if right and not self.mouse_pressed["right"]:
+                    self.mouse_pressed["right"] = True
+
+                if middle and not self.mouse_pressed["middle"]:
+                    self.mouse_pressed["middle"] = True
+            
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self.mouse_pressed["left"], self.mouse_pressed["right"], self.mouse_pressed["middle"] = pygame.mouse.get_pressed()
+
+            if self.mouse_pressed["left"]:
+                cell_x, cell_y = self.mouse_to_grid_pos(pygame.mouse.get_pos())
+                self.model.toggle_cell(cell_x, cell_y, self.mouse_mode)
+
+
+
+            # elif event.type == pygame.MOUSEMOTION:
+            #     cell_x, cell_y = self.mouse_to_grid_pos(pygame.mouse.get_pos())
+            #     if self.mouse_pressed["left"]:
+            #         print(cell_x, cell_y, self.mouse_mode)
+            #         self.model.toggle_cell(cell_x, cell_y, self.mouse_mode)
+
+    def mouse_to_grid_pos(self, mouse_pos: Tuple[int, int]) -> Tuple[int, int]:
+        return (int(mouse_pos[0]//self.viewer.cell_width), int(mouse_pos[1]//self.viewer.cell_height))
+        # self.mouse_mode = self.model.grid[int(mx//self.viewer.cell_width)][int(my//self.viewer.cell_height)].state
+
+"""
+
+==MOUSE=BEHAVIOR==
+when you click a cell it:
+- flips a cells state
+- locks a mouse mode [create, destroy]
+
+when you click and drag over a cell it:
+- based on mouse mode it creates or destroys cells it touches
+
+"""
+
+
 
 """
 ===PAYLOADS===

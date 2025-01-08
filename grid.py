@@ -19,14 +19,16 @@ class Cell:
     next_state: int = 0
     lifetime: int = 0
 
-    def set_neighbors(self, _neighbors: List["Cell"]):
+    def set_neighbors(self, _neighbors: List[Cell]):
         self.neighbors = _neighbors
 
     def toggle(self):
+        print(f'changing state from: {self.state}',end='')
         if self.state:
-            self.state = 1
-        else:
             self.state = 0
+        else:
+            self.state = 1
+        print(f' to: {self.state}')
 
 class Grid:
     def __init__(self, _ruleset: Ruleset, _width: int, _height: int):

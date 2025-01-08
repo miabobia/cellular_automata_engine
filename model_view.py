@@ -22,6 +22,7 @@ class Viewer:
         self.screen_size = _screen_size
         self.display_config = _display_config
         self.pallete = self.display_config.data["pallete"]
+        self.interactable = False
         # self.resize_viewer()
 
     def set_model(self, _model: Model):
@@ -66,6 +67,7 @@ class PyGameView(Viewer):
 
         pg.init()
         self.screen = pg.display.set_mode(self.screen_size)
+        self.interactable = True
 
     def show_screen(self):
         pg.display.flip()
@@ -75,11 +77,6 @@ class PyGameView(Viewer):
         return super().cleanup()
 
 class GridView(PyGameView):
-
-    # def __init__(self, _screen_size: Tuple[int, int], _display_config: DisplayConfig):
-    #     super().__init__(_screen_size, _display_config)
-
-    #     # init pygame things here
 
     def render(self, model_grid: Grid):
         for i, row in enumerate(model_grid.cells):
@@ -124,18 +121,6 @@ class ExportView(Viewer):
         print(f'saving image to {filename}')
         self.image.save(filename, 'JPEG', quality=95)
         self.image_counter += 1
-    # def render(self, model_grid: Grid):
-    #     for i, row in enumerate(model_grid.cells):
-    #         for j, cell in enumerate(row):
-    #             c = self.pallete.get_color(cell.state)
-    #             r = pg.Rect(j * self.cell_width, i * self.cell_height, self.cell_width, self.cell_height)
-    #             pg.draw.rect(self.screen, c, r)
-    #     self.save_image()
-
-    # def save_image(self):
-    #     print(f'saving image to frames/{self.image_counter}.JPEG')
-    #     pg.image.save(self.screen, f'frames/{self.image_counter}.JPEG')
-    #     self.image_counter += 1
 
     def compile_frames(self, fps: int):
         transformed_frames = [f'frames/{frame}' for frame in os.listdir('frames')]
@@ -165,7 +150,7 @@ class ExportView(Viewer):
         file_list = os.listdir(output_dir)
         file_count = len(file_list)
         for filename in file_list:
-            file_path = os.path.join(output_dir, filename)		
+            file_path = os.path.join(output_dir, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
 

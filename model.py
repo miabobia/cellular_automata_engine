@@ -29,18 +29,18 @@ class Model:
         if self.generation == self.total_generations:
             self.viewer.cleanup()
             return False
-        if not self.running:
-            return True
-        self.generation += 1
-        self.grid_model.calculate_next_generation()
+        if self.running:
+            self.generation += 1
+            self.grid_model.calculate_next_generation()
         self.viewer.update(self.grid_model)
         return True
 
-    def toggle_cell(self, x: int, y: int):
+    def toggle_cell(self, x: int, y: int, new_state: int):
         """
         updates grid's cell to toggle on or off
         """
-        self.grid_model.cells[y][x].toggle()
+
+        self.grid_model.cells[y][x].state = new_state
 
     def increment_grid_size(self, n: int):
         """
