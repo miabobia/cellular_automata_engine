@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List, Tuple, TYPE_CHECKING
+from typing import Tuple, TYPE_CHECKING
 import pygame as pg
 from pathlib import Path
 import cv2
@@ -9,7 +9,6 @@ from PIL import Image, ImageDraw
 if TYPE_CHECKING:
     from model import Model
     from config import DisplayConfig
-    from events import Event, EventDispatch
     from grid import Grid
 
 
@@ -53,6 +52,10 @@ class Viewer:
         """
         self.pallete = self.display_config.data["pallete"]
 
+    def get_alpha(self, cell):
+        return max(255 - 255*cell.lifetime//cell.age_limit, 0)
+
+
     def cleanup(self):
         """
         some implementations of Viewer will need to cleanup on exit
@@ -66,10 +69,12 @@ class PyGameView(Viewer):
         super().__init__(_screen_size, _display_config)
 
         pg.init()
-        self.screen = pg.display.set_mode(self.screen_size)
+        self.base_screen = pg.display.set_mode(self.screen_size)
+        self.render_screen = pg.Surface(self.screen_size, pg.SRCALPHA)
         self.interactable = True
 
     def show_screen(self):
+        self.base_screen.blit(self.render_screen, (0, 0))
         pg.display.flip()
 
     def cleanup(self):
@@ -79,11 +84,13 @@ class PyGameView(Viewer):
 class GridView(PyGameView):
 
     def render(self, model_grid: Grid):
-        for i, row in enumerate(model_grid.cells):
+        
+        self.base_screen.fill(self.pallete.get_color(0))
+        for i, row in enumerate(model_grid.cells):  
             for j, cell in enumerate(row):
-                c = self.pallete.get_color(cell.state)
+                c = self.pallete.get_color(cell.state, self.get_alpha(cell))
                 r = pg.Rect(j * self.cell_width, i * self.cell_height, self.cell_width, self.cell_height)
-                pg.draw.rect(self.screen, c, r)
+                pg.draw.rect(self.render_screen, c, r)
 
         self.show_screen()
 
@@ -96,19 +103,20 @@ class ExportView(Viewer):
 
     def render(self, model_grid: Grid):
         # Create fresh image for this frame
-        self.image = Image.new('RGB', self.screen_size, color='black')
-        self.draw = ImageDraw.Draw(self.image)
+        self.image = Image.new('RGB', self.screen_size, color=self.pallete.get_color(0))
+        self.draw = ImageDraw.Draw(self.image, 'RGBA')
         
         for i, row in enumerate(model_grid.cells):
             for j, cell in enumerate(row):
-                color = self.pallete.get_color(cell.state)
+                color = self.pallete.get_color(cell.state, self.get_alpha(cell))
+                # if i in [0, 1] and j in [0, 1]: print(color)
                 # Calculate rectangle coordinates
                 x0 = j * self.cell_width
                 y0 = i * self.cell_height
                 x1 = x0 + self.cell_width
                 y1 = y0 + self.cell_height
                 # Draw rectangle
-                self.draw.rectangle([x0, y0, x1, y1], fill=color)
+                self.draw.rectangle([x0, y0, x1, y1], fill=color, outline=None, width=0)
         
         self.save_image()
 
@@ -117,9 +125,9 @@ class ExportView(Viewer):
         import os
         os.makedirs('frames', exist_ok=True)
         
-        filename = f'frames/{self.image_counter:04d}.jpg'
+        filename = f'frames/{self.image_counter:04d}.png'
         print(f'saving image to {filename}')
-        self.image.save(filename, 'JPEG', quality=95)
+        self.image.save(filename, 'PNG', quality=95)
         self.image_counter += 1
 
     def compile_frames(self, fps: int):

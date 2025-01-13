@@ -1,29 +1,34 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
-import pygame
+from random import randint
+
+COLOR_TYPES = Tuple[int, int, int] | Tuple[int, int, int, int]
+
 
 class ColorPallete(ABC):
 
     @classmethod
     @abstractmethod
-    def get_color(state: int) -> Tuple[int, int, int]:
+    def get_color(state: int, alpha: int = 0) -> COLOR_TYPES:
         """
         returns color based on cell's current state
         """
         pass
 
+    
+
 class ClassicPallete(ColorPallete):
-    def get_color(state: int) -> Tuple[int, int, int]:
+    def get_color(state: int, alpha: int = 0) -> COLOR_TYPES:
         match state:
             case 0:
                 return (0, 0, 0)
             case 1:
-                return (255, 255, 255)
+                return (255, 255, 255, alpha)
             case _:
-                return (0, 0, 0)
+                return (0, 0, 0, 255)
 
 class TransPallete(ColorPallete):
-    def get_color(state: int) -> Tuple[int, int, int]:
+    def get_color(state: int, alpha: int = 0) -> COLOR_TYPES:
         match state:
             case 0:
                 return (188, 229, 226)
@@ -33,7 +38,7 @@ class TransPallete(ColorPallete):
                 return (0, 0, 0)
 
 class MatrixPallete(ColorPallete):
-    def get_color(state: int) -> Tuple[int, int, int]:
+    def get_color(state: int, alpha: int = 0) -> COLOR_TYPES:
         match state:
             case 0:
                 return (0, 0, 0)
@@ -43,7 +48,7 @@ class MatrixPallete(ColorPallete):
                 return (0, 0, 0)
 
 class RetroPallete(ColorPallete):
-    def get_color(state: int) -> Tuple[int, int, int]:
+    def get_color(state: int, alpha: int = 0) -> COLOR_TYPES:
         match state:
             case 0:
                 return (0, 0, 0)
@@ -53,7 +58,7 @@ class RetroPallete(ColorPallete):
                 return (0, 0, 0)
 
 class GameBoyPallete(ColorPallete):
-    def get_color(state: int) -> Tuple[int, int, int]:
+    def get_color(state: int, alpha: int = 0) -> COLOR_TYPES:
         match state:
             case 0:
                 return (0, 0, 0)
@@ -63,7 +68,7 @@ class GameBoyPallete(ColorPallete):
                 return (0, 0, 0)
 
 class PastelPinkYellowPallete(ColorPallete):
-    def get_color(state: int) -> Tuple[int, int, int]:
+    def get_color(state: int, alpha: int = 0) -> COLOR_TYPES:
         match state:
             case 0:
                 return (255, 182, 193)
@@ -73,7 +78,7 @@ class PastelPinkYellowPallete(ColorPallete):
                 return (0, 0, 0)
 
 class PastelBlueYellowPallete(ColorPallete):
-    def get_color(state: int) -> Tuple[int, int, int]:
+    def get_color(state: int, alpha: int = 0) -> COLOR_TYPES:
         match state:
             case 0:
                 return (173, 216, 230)
@@ -83,11 +88,11 @@ class PastelBlueYellowPallete(ColorPallete):
                 return (0, 0, 0)
 
 class BlackRedPallete(ColorPallete):
-    def get_color(state: int) -> Tuple[int, int, int]:
+    def get_color(state: int, alpha: int = 0) -> COLOR_TYPES:
         match state:
             case 0:
                 return (0, 0, 0)
             case 1:
-                return (255, 0, 0)
+                return (255, 0, 0, alpha)
             case _:
                 return (0, 0, 0)

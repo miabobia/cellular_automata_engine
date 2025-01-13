@@ -2,14 +2,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, TYPE_CHECKING
 from random import randint
-from enum import Enum
 
 if TYPE_CHECKING:
     from rulesets import Ruleset
-
-class CellState(Enum):
-    DEAD = 0
-    ALIVE = 1
 
 @dataclass
 class Cell:
@@ -18,17 +13,17 @@ class Cell:
     state: int
     next_state: int = 0
     lifetime: int = 0
+    age_factor: int = 5
+    age_limit: int = 1000
 
     def set_neighbors(self, _neighbors: List[Cell]):
         self.neighbors = _neighbors
 
     def toggle(self):
-        print(f'changing state from: {self.state}',end='')
         if self.state:
             self.state = 0
         else:
             self.state = 1
-        print(f' to: {self.state}')
 
 class Grid:
     def __init__(self, _ruleset: Ruleset, _width: int, _height: int):
@@ -40,6 +35,9 @@ class Grid:
 
     def init_cells(self):
         self.cells = []
+
+
+
         for i in range(self.height):
             self.cells.append([])
             for j in range(self.width):
@@ -56,8 +54,10 @@ class Grid:
 
     def calculate_next_generation(self):
         self.ruleset.next_generation(self.cells)
-
         # swap current state with next state
-        for i, row in enumerate(self.cells):
-            for j, col in enumerate(row):
-                self.cells[i][j].state = self.cells[i][j].next_state
+        for row in self.cells:
+            for cell in row:
+                if self.ruleset.use_lifetimes:
+                    self.ruleset.lifetime_update(cell)
+
+                cell.state = cell.next_state

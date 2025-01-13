@@ -1,7 +1,6 @@
 from __future__ import annotations
 import pygame
 from typing import TYPE_CHECKING, Tuple
-from enum import Enum
 
 if TYPE_CHECKING:
     from model import Model
@@ -105,47 +104,5 @@ class Controller():
                 cell_x, cell_y = self.mouse_to_grid_pos(pygame.mouse.get_pos())
                 self.model.toggle_cell(cell_x, cell_y, self.mouse_mode)
 
-
-
-            # elif event.type == pygame.MOUSEMOTION:
-            #     cell_x, cell_y = self.mouse_to_grid_pos(pygame.mouse.get_pos())
-            #     if self.mouse_pressed["left"]:
-            #         print(cell_x, cell_y, self.mouse_mode)
-            #         self.model.toggle_cell(cell_x, cell_y, self.mouse_mode)
-
     def mouse_to_grid_pos(self, mouse_pos: Tuple[int, int]) -> Tuple[int, int]:
         return (int(mouse_pos[0]//self.viewer.cell_width), int(mouse_pos[1]//self.viewer.cell_height))
-        # self.mouse_mode = self.model.grid[int(mx//self.viewer.cell_width)][int(my//self.viewer.cell_height)].state
-
-"""
-
-==MOUSE=BEHAVIOR==
-when you click a cell it:
-- flips a cells state
-- locks a mouse mode [create, destroy]
-
-when you click and drag over a cell it:
-- based on mouse mode it creates or destroys cells it touches
-
-"""
-
-
-
-"""
-===PAYLOADS===
-- toggle the state of a cell
-- toggle run state of game (pause/unpause)
-- change framerate
-- pallete change
-- grid size
-- go to iteration (n)
-- randomize board
-
-
-
-what does a payload look like?
-{
-    function_name -> str,
-    parameters -> dict
-}
-"""

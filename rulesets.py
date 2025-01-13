@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple
-import model
 
 class Ruleset(ABC):
+
+    def __init__(self, _use_lifetimes=False):
+        self.use_lifetimes = _use_lifetimes
     
     @abstractmethod
     def next_generation(self, grid):
@@ -18,6 +20,17 @@ class Ruleset(ABC):
         returns a list of tuples which define each Cell's neighbor's relative to its position
         """
         pass
+
+    def lifetime_update(self, cell):
+        if cell.state == cell.next_state:
+            if cell.state:
+                cell.lifetime += cell.age_factor
+                if cell.lifetime >= cell.age_limit:
+                    cell.next_state = 0
+                    cell.lifetime = 0
+                    # print(f'cell lifetime reached {cell.lifetime}')
+        else:
+            cell.lifetime = 0
 
 class Conway(Ruleset):
 
@@ -154,3 +167,12 @@ class WickstretcherParasites(Ruleset):
 
     def __repr__(self) -> str:
         return "Wickstretcher And The Parasites Ruleset"
+
+
+def get_all_rulesets() -> List[Ruleset]:
+    return [
+        Conway,
+        HighLifeRuleset,
+        DayNightRuleset,
+        WickstretcherParasites
+    ]

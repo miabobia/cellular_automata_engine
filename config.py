@@ -27,3 +27,4 @@ class DisplayConfig:
             self.data["pallete_index"] = len(self.pallete_set) - 1
         
         self.data["pallete"] = self.pallete_set[self.data["pallete_index"]]
+
